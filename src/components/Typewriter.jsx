@@ -10,13 +10,19 @@ export default class Typewriter extends Component {
 
         this.fillPool = this.fillPool.bind(this)
         this.dump = this.dump.bind(this)
+        this.wpm = this.wpm.bind(this)
         this.handleType = this.handleType.bind(this)
 
+        this.timestamp_start = 0;
+
         this.state = {
+            timestamps: [],
             pool: [],
             pipe: [],
             drain: [],
-            buffer: []
+            buffer: [],
+            typing: false,
+            wpm: 0
         }
     }
 
@@ -32,6 +38,7 @@ export default class Typewriter extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.handleType)
+        clearInterval(this.interval);
     }
 
     // Fill Pool with poolSize:n words
@@ -68,7 +75,12 @@ export default class Typewriter extends Component {
                 if (this.state.buffer.join('') === this.state.pipe[0]) {
                     console.log('matched')
                     shouldBuffer = false;
+                    this.setState(state => ({
+                        typing: false,
+                        timestamps: [ ...state.timestamps, [this.timestamp_start, Date.now()] ]
+                    }));
                     this.dump()
+                    this.wpm()
                 } else {
                     console.log('not matched')
                     console.log(this.state.buffer)
@@ -86,12 +98,24 @@ export default class Typewriter extends Component {
                     pool: [],
                     pipe: [],
                     drain: [],
-                    buffer: []
+                    buffer: [],
+                    typing: false,
+                    wpm: 0
                 });
+                this.timestamp_start = 0
                 this.dump()
                 break;
-        
+
             default:
+                // notedown first keypress
+                if (!this.state.typing) {
+                    this.setState(state => ({
+                        typing: true,
+                        // timestamps: [ ...state.timestamps, [Date.now()] ]
+                    }));
+                    this.timestamp_start = Date.now();
+                }
+
                 // Add to key typed buffer
                 if (shouldBuffer && this.state.buffer.length < this.state.pipe[0].length) {
                     this.setState(state => ({
@@ -103,23 +127,54 @@ export default class Typewriter extends Component {
 
     }
 
+    wpm() {
+        // Calculate Word per Minute
+        let ts = this.state.timestamps;
+        const wpm_words_count = 10
+        let max = (ts.length > wpm_words_count) ? wpm_words_count : ts.length ;
+        if (max) {
+            let end = ts[ts.length - 1][1];
+            let start = ts[ts.length - max][0];
+            let minutes = ((end - start)/1000/60);
+            this.setState({
+                wpm: Math.floor( max / minutes )
+            })
+            // console.log([max, end, start, minutes, wpm])
+        }
+    }
+
     render() {
 
-        let drain = this.state.drain.join(' ')
         let pool = this.state.pool.join(' ')
+
+        console.log(this.state.timestamps)
 
         let pipe = this.state.pipe.map(word => {
             return word.split('').map((letter, i) => {
                 if ((this.state.buffer.length > i)) {
-                    if (this.state.buffer[i] == letter)
-                        return <span key={i} className="success">{letter}</span>
+                    if (this.state.buffer[i] === letter)
+                    return <span key={i} className="success">{letter}</span>
                     else 
-                        return <span key={i} className="fail">{letter}</span>
+                    return <span key={i} className="fail">{letter}</span>
                 } else {
                     return <span key={i}>{letter}</span>
                 }
             })
         })
+
+        let drain = this.state.drain.map((word, i) => {
+            let ri = (i === 0) ? this.state.timestamps.length : i;
+            let ms = Math.floor( 1 / ((this.state.timestamps[ri-1][1] - this.state.timestamps[ri-1][0]) / 1000/60) );
+            return (
+                <span key={i}>
+                    <span className="wordSpeed">{ms} wpm</span>
+                    {i>0 && <span>&nbsp;</span>}
+                    {word}
+                </span>
+            )
+        })
+        
+        let wpm = this.state.wpm;
 
         return (
             <div id="typewriter">
@@ -134,6 +189,11 @@ export default class Typewriter extends Component {
                     </div>
                 </div>
 
+                <div className="wpm">
+                    {!!wpm && <div> {wpm} <span class="text">Average Words Per Minute</span></div>}
+                </div>
+
+
                 <style jsx>{`
                     #typewriter {
                         width: 100%;
@@ -146,7 +206,7 @@ export default class Typewriter extends Component {
                         font-size: 1.5em;
                         padding: 20px;
                         white-space: nowrap;
-                        overflow: hidden;
+                        overflow-x: hidden;
                     }
 
                     .fail {
@@ -179,6 +239,30 @@ export default class Typewriter extends Component {
                         background-color: rgba(125,125,125,0.15);
                         height: 100%;
                         padding: 25px 0;
+                    }
+
+                    .wpm {
+                        color: rgba(200,200,200,1);
+                        position: absolute;
+                        padding-left: 25%;
+                        font-size: 0.9em;
+                        margin: 25px;
+                    }
+
+                    .wpm .text {
+                        color: rgba(125,125,125,0.8);
+                        font-size: 0.75em;
+                        text-transform: uppercase;
+                        margin-left: 5px;
+                    }
+
+                    .wordSpeed {
+                        position: absolute;
+                        margin-top: -18px;
+                        direction: ltr;
+                        font-size: 9px;
+                        color: #afafaf;
+                        margin-right: 2px;
                     }
 
                 `}</style>
