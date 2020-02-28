@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactGA from 'react-ga';
-import './App.css';
 
 import Typewriter from './components/Typewriter'
+import Navbar from './components/Navbar'
 
 function App() {
 
@@ -11,14 +11,32 @@ function App() {
   ReactGA.pageview(window.location.pathname + window.location.search);
   
   return (
-    <div className="App">
-      <header className="App-header">
+    <div id="app">
 
-        <h1> typeroo </h1>
+        <Navbar />
 
-        <Typewriter />
-      
-      </header>
+        <div className="content">
+          <Typewriter />
+        </div>
+
+
+        <style jsx>{`
+            #app {
+              text-align: center;
+            }
+
+            .content {
+              background-color: #282c34;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              font-size: calc(10px + 2vmin);
+              color: white;
+            }
+        `}</style>
+
     </div>
   );
 }
