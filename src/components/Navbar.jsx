@@ -40,12 +40,13 @@ export default class Navbar extends Component {
                     #navbar {
                         position: fixed;
                         width: 60%;
-                        background-color: #282c34;
+                        background-color: transparent;
                         border-bottom: 1px solid #ffffff0f;
                         height: 90px;
                         color: white;
                         display: flex;
                         padding: 0 20%;
+                        z-index: 999;
                     }
 
                     .brand {
