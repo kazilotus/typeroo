@@ -21,8 +21,8 @@ export default class Typewriter extends Component {
             pipe: [],
             drain: [],
             buffer: [],
-            typing: false,
-            wpm: 0
+            wpm: [],
+            typing: false
         }
     }
 
@@ -95,15 +95,19 @@ export default class Typewriter extends Component {
 
             case "Escape":
                 this.setState({
+                    timestamps: [],
                     pool: [],
                     pipe: [],
                     drain: [],
                     buffer: [],
                     typing: false,
-                    wpm: 0
+                    wpm: []
                 });
                 this.timestamp_start = 0
                 this.dump()
+                break;
+
+            case "Shift":
                 break;
 
             default:
@@ -137,10 +141,16 @@ export default class Typewriter extends Component {
             let start = ts[ts.length - max][0];
             let minutes = ((end - start)/1000/60);
             this.setState({
-                wpm: Math.floor( max / minutes )
+                wpm: [...this.state.wpm, Math.floor( max / minutes )]
             })
+            // wpm out
+            this.props.wpmList(this.state.wpm)
             // console.log([max, end, start, minutes, wpm])
         }
+    }
+
+    keyboard() {
+        document.getElementById('focusable').focus();
     }
 
     render() {
@@ -174,10 +184,12 @@ export default class Typewriter extends Component {
             )
         })
         
-        let wpm = this.state.wpm;
+        let wpm = this.state.wpm[this.state.wpm.length - 1];
 
         return (
-            <div id="typewriter">
+            <div id="typewriter" onClick={this.keyboard}>
+
+                <input id="focusable" type="text" autofocus/>
 
                 <div className="field">
                     <div className="left">
@@ -199,6 +211,10 @@ export default class Typewriter extends Component {
                         width: 100%;
                     }
 
+                    #focusable {
+                        transform: scale(0);
+                    }
+
                     .field {
                         border-radius: 4px;
                         background-color: rgba(125,125,125,0.1);
@@ -206,7 +222,7 @@ export default class Typewriter extends Component {
                         font-size: 1.5em;
                         padding: 20px;
                         white-space: nowrap;
-                        overflow-x: hidden;
+                        overflow: hidden;
                     }
 
                     .fail {

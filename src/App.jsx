@@ -1,44 +1,66 @@
-import React from 'react';
+import React, { Component } from 'react'
 import ReactGA from 'react-ga';
 
-import Typewriter from './components/Typewriter'
 import Navbar from './components/Navbar'
+import Graph from './components/Graph'
+import Typewriter from './components/Typewriter'
 
-function App() {
+export default class App extends Component {
 
-  // Initialize GA
-  ReactGA.initialize('UA-54793468-7');
-  ReactGA.pageview(window.location.pathname + window.location.search);
-  
-  return (
-    <div id="app">
+  constructor(props) {
+    super(props)
 
-        <Navbar />
+    this.wpmHandle = this.wpmHandle.bind(this)
 
-        <div className="content">
-          <Typewriter />
-        </div>
-
-
-        <style jsx>{`
-            #app {
-              text-align: center;
-            }
-
-            .content {
-              background-color: #282c34;
-              min-height: 100vh;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              font-size: calc(10px + 2vmin);
-              color: white;
-            }
-        `}</style>
-
-    </div>
-  );
+    this.state = {
+        wpm: [],
+    }
 }
 
-export default App;
+  componentDidMount(){
+    // Initialize GA
+    ReactGA.initialize('UA-54793468-7');
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }
+
+  wpmHandle(wpms) {
+    this.setState({
+      wpm: wpms
+    })
+  }
+  
+  render() {
+    return (
+      <div id="app">
+  
+          <Navbar />
+  
+          <Graph wpmList={this.state.wpm}/>
+  
+          <div className="content">
+            <Typewriter wpmList={this.wpmHandle}/>
+          </div>
+  
+  
+          <style jsx>{`
+              #app {
+                text-align: center;
+                background-color: #282c34;
+              }
+  
+              .content {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-size: calc(10px + 2vmin);
+                color: white;
+              }
+          `}</style>
+  
+      </div>
+    );
+  }
+
+}
