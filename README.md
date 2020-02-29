@@ -4,6 +4,8 @@ Live app can be accessed at [Typeroo](https://typeroo.com).
 
 Continuous Typing practice platform
 
+![screenshot](./public/screenshot.png)
+
 
 ## TODO
 
