@@ -13,8 +13,8 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-ga": "^2.7.0",
-    "react-scripts": "3.4.0",
-    "styled-jsx": "^3.2.4",
+    "react-scripts": "5.0.1",
+    "styled-jsx": "^5.1.0",
     "typed.js": "^2.0.11"
   },
   "scripts": {
